@@ -3,15 +3,15 @@ package ec.sergy.service;
 import ec.sergy.model.LoginRequest;
 import ec.sergy.model.RefreshTokenRequest;
 import ec.sergy.model.RegisterRequest;
-import ec.sergy.model.User;
+import ec.sergy.entity.User;
 import ec.sergy.repository.UserRepository;
 import ec.sergy.repository.UserRepositoryByRefreshToken;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import java.util.HashMap;
 
 import java.util.Map;
 
@@ -31,9 +31,12 @@ public class AuthService {
         this.userRepositoryByRefreshToken = userRepositoryByRefreshToken;
     }
 
-    public ResponseEntity<String> register(RegisterRequest request) {
+    public ResponseEntity<Map<String, String>> register(RegisterRequest request) {
+        Map<String, String> response = new HashMap<>();
+
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().body("Email already exists");
+            response.put("message", "Email already exists");
+            return ResponseEntity.badRequest().body(response);
         }
 
         User user = new User();
@@ -42,7 +45,8 @@ public class AuthService {
         user.setRole(request.getRole());
 
         userRepository.save(user);
-        return ResponseEntity.ok("User registered successfully");
+        response.put("message", "User registered successfully");
+        return ResponseEntity.ok(response);
     }
 
     public ResponseEntity<?> authenticate(LoginRequest request) {
@@ -62,7 +66,9 @@ public class AuthService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new BadCredentialsException("Invalid credentials");
+            return ResponseEntity.ok(Map.of(
+                    "message", "Invalid credentials"
+            ));
         }
 
         String accessToken = jwtService.generateToken(user.getEmail(), Map.of("role", user.getRole()));

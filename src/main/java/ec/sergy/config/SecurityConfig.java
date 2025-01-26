@@ -9,14 +9,18 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(UserDetailsService userDetailsService) {
+    // Constructor con inyección del filtro JwtAuthenticationFilter
+    public SecurityConfig(UserDetailsService userDetailsService, JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.userDetailsService = userDetailsService;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
     @Bean
@@ -27,7 +31,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll() // Permitir rutas públicas
                         .anyRequest().authenticated() // Proteger todas las demás rutas
                 )
-                .httpBasic(httpBasicCustomizer -> {}); // Nueva sintaxis para habilitar HTTP Basic Auth
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) // Añadir el filtro JWT antes de UsernamePasswordAuthenticationFilter
+                .httpBasic(httpBasicCustomizer -> {}); // Habilitar HTTP Basic Auth (si es necesario)
 
         return http.build();
     }

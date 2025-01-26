@@ -1,4 +1,4 @@
-package ec.sergy.model;
+package ec.sergy.entity;
 
 import jakarta.persistence.*;
 
