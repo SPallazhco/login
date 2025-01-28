@@ -87,11 +87,25 @@ public class AuthService {
     public ResponseEntity<?> refreshToken(RefreshTokenRequest request) {
         String refreshToken = request.getRefreshToken();
 
+        // Verificar si el token existe en la base de datos y está asociado a un usuario
         User user = userRepositoryByRefreshToken.findByRefreshToken(refreshToken)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid refresh token"));
 
-        String accessToken = jwtService.generateToken(user.getEmail(), Map.of("role", user.getRole()));
+        // Validar el refresh token (verificar expiración y firma)
+        if (!jwtService.isTokenValid(refreshToken, user.getEmail())) {
+            throw new IllegalArgumentException("Expired or invalid refresh token");
+        }
 
-        return ResponseEntity.ok(Map.of("accessToken", accessToken));
+        // Generar un nuevo access token
+        String newToken = jwtService.generateRefreshToken(
+                user.getEmail()
+        );
+
+        // Actualiza en BD
+        user.setRefreshToken(newToken);
+        userRepository.save(user);
+
+        // Retornar el nuevo token
+        return ResponseEntity.ok(Map.of("refreshToken", newToken));
     }
 }
