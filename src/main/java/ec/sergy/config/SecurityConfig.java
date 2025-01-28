@@ -32,7 +32,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated() // Proteger todas las demás rutas
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) // Añadir el filtro JWT antes de UsernamePasswordAuthenticationFilter
-                .httpBasic(httpBasicCustomizer -> {}); // Habilitar HTTP Basic Auth (si es necesario)
+                .httpBasic(httpBasic -> httpBasic.disable()); // Habilitar HTTP Basic Auth (si es necesario)
 
         return http.build();
     }
