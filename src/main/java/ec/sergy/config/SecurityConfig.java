@@ -46,7 +46,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // Especificar origen permitido
+        configuration.setAllowedOrigins(List.of("https://spallazhco.github.io")); // Especificar origen permitido
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Métodos permitidos
         configuration.setAllowedHeaders(List.of("*")); // Permitir todos los encabezados
         configuration.setAllowCredentials(true); // Permitir credenciales (JWT)
