@@ -49,18 +49,6 @@ public class AuthService {
         return ResponseEntity.ok(response);
     }
 
-    public ResponseEntity<?> authenticate(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-        if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            String token = jwtService.generateToken(user.getEmail(), Map.of("role", user.getRole()));
-            return ResponseEntity.ok(Map.of("token", token));
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
-        }
-    }
-
     public ResponseEntity<?> login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
